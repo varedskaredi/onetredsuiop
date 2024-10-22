@@ -1,0 +1,31 @@
+name: Build and Trigger Jobs
+
+on:
+  schedule:
+    - cron: '45 18 * * 1'  # Triggers Job1: Every Monday at 12:15 AM IST (6:45 PM UTC)
+    - cron: '50 2 * * 2'  # Triggers Job2: Every Tuesday at 8:20 AM IST (2:50 AM UTC)
+    - cron: '0 11 * * 3'  # Triggers Job3: Every Wednesday at 4:30 PM IST (11:00 AM UTC)
+    - cron: '45 18 * * 4'  # Triggers Job4: Every Thursday at 12:15 AM IST (6:45 PM UTC previous day)
+    - cron: '50 2 * * 5'  # Triggers Job5: Every Friday at 8:20 AM IST (2:50 AM UTC)
+    - cron: '0 11 * * 6'  # Triggers Job6: Every Saturday at 4:30 PM IST (11:00 AM UTC)
+    - cron: '50 2 * * 0'  # Triggers Job7: Every Sunday at 8:20 AM IST (2:50 AM UTC)
+  workflow_dispatch:
+
+jobs:
+  trigger_jobs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set variables
+        run: |
+          echo "REPO_OWNER=$(echo $GITHUB_REPOSITORY | cut -d'/' -f1)" >> $GITHUB_ENV
+          echo "REPO_NAME=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)" >> $GITHUB_ENV
+
+      - name: Trigger Job1 Workflow
+        run: |
+          curl -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.MY_GITHUB_TOKEN }}" \
+          https://api.github.com/repos/${{ env.REPO_OWNER }}/${{ env.REPO_NAME }}/actions/workflows/job1.yml/dispatches \
+          -d '{"ref":"main"}'
+
